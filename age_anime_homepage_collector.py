@@ -16,7 +16,7 @@ class AnimeCollector:
     def get_selector(self):
         '''解析AGE动漫首页并生成选择器'''
         url = 'https://www.agefans.tv/'
-        response = requests.get(url=url, verify=False)
+        response = requests.get(url=url, verify=False, timeout=5)
         text = response.text
         selector = etree.HTML(text)
         return selector
@@ -30,27 +30,27 @@ class AnimeCollector:
         '''通过构建property来返回选择器'''
         return self.__selector
 
-    def get_recommended_daily_list(self, recommended_daily_list=None):
-        '''获取AGE动漫首页左侧的每日推荐动漫列表'''
+    def get_recommended_daily_or_recent_updates_left_list(self, index=None):
+        '''获取AGE动漫首页左侧的每日推荐和最近更新（左）动漫列表'''
         blockcontent_pattern = '//div[@class="div_left baseblock"]//div[@class="blockcontent"]'
         blockcontent_node = self.selector.xpath(blockcontent_pattern)
-        blockcontent_node_first = blockcontent_node.pop(0)
-        node_first_pattern = 'ul//li//a[position()=1]'
-        recommended_daily = blockcontent_node_first.xpath(node_first_pattern)
-        recommended_daily_list = []
-        for anime in recommended_daily:
+        blockcontent_node_index = blockcontent_node.pop(index)
+        node_index_pattern = 'ul//li//a[position()=1]'
+        anime_index = blockcontent_node_index.xpath(node_index_pattern)
+        anime_list = []
+        for anime in anime_index:
             title = anime.xpath('img/@alt').pop()
             extra_info = ''
             extra_info_parse = anime.xpath('span/text()')
             if extra_info_parse:
                 extra_info = extra_info_parse.pop()
             url = 'https://www.agefans.tv' + anime.xpath('@href').pop()
-            title_href_dict = {'title': title,
-                               'extra_info': extra_info, 'url': url}
-            recommended_daily_list.append(title_href_dict)
-        return recommended_daily_list
+            title_extra_info_url_dict = {'title': title,
+                                         'extra_info': extra_info, 'url': url}
+            anime_list.append(title_extra_info_url_dict)
+        return anime_list
 
-    def get_weekly_release_list(self, weekly_release_list=None):
+    def get_weekly_release_list(self):
         '''获取AGE动漫首页右侧的每周放送列表'''
         blockcontent_pattern = '//div[@class="div_right baseblock"]//div[@class="blockcontent"]'
         blockcontent_parse = self.selector.xpath(blockcontent_pattern)
@@ -67,28 +67,7 @@ class AnimeCollector:
         weekly_release_list = json.loads(anime_list)
         return weekly_release_list
 
-    def get_recent_updates_left_list(self, recent_updates_left_list=None):
-        '''获取AGE动漫首页左侧的最近更新动漫列表'''
-        blockcontent_pattern = '//div[@class="div_left baseblock"]//div[@class="blockcontent"]'
-        blockcontent_node = self.selector.xpath(blockcontent_pattern)
-        blockcontent_node_second = blockcontent_node.pop(1)
-        node_second_pattern = 'ul//li//a[position()=1]'
-        recent_update_left = blockcontent_node_second.xpath(
-            node_second_pattern)
-        recent_updates_left_list = []
-        for anime in recent_update_left:
-            title = anime.xpath('img/@alt').pop()
-            extra_info = ''
-            extra_info_parse = anime.xpath('span/text()')
-            if extra_info_parse:
-                extra_info = extra_info_parse.pop()
-            url = 'https://www.agefans.tv' + anime.xpath('@href').pop()
-            title_href_dict = {'title': title,
-                               'extra_info': extra_info, 'url': url}
-            recent_updates_left_list.append(title_href_dict)
-        return recent_updates_left_list
-
-    def get_recent_updates_right_list(self, recent_update_right_list=None):
+    def get_recent_updates_right_list(self):
         '''获取AGE动漫首页右侧的最近更新动漫列表'''
         blockcontent_pattern = '//div[@class="div_right baseblock"]//div[@class="blockcontent"]'
         blockcontent_node = self.selector.xpath(blockcontent_pattern)
@@ -105,7 +84,7 @@ class AnimeCollector:
                                      'url': url, 'update_time': update_time}
             recent_update_right_list.append(title_url_update_dict)
         return recent_update_right_list
-    
+
     def show_recommended_daily_or_recent_updates_left_list(self, message=None, anime_list=None):
         '''整合了展示AGE动漫首页左侧的包括每日更新和最近更新（左）动漫列表'''
         print(message)
@@ -126,45 +105,54 @@ class AnimeCollector:
                         is_new = 'new!'
                     print(anime['name'], anime['namefornew'], is_new,
                           'https://www.agefans.tv/detail/' + anime['id'])
-    
+
     def show_recent_updates_right_list(self, message=None, anime_list=None):
         '''显示右侧的最近更新动漫列表'''
         print(message)
         for anime in anime_list:
-            print(anime['title'], anime['url'], anime['update_time'])
-
+            print(anime['title'], anime['update_time'], anime['url'])
 
     def integration_mode_show(self, keyword=None, anime_list=None):
         '''整合模式显示动漫列表'''
         if keyword == 'recommended_daily':
             message = '每日推荐：'
-            self.show_recommended_daily_or_recent_updates_left_list(message=message, anime_list=anime_list)
+            self.show_recommended_daily_or_recent_updates_left_list(
+                message=message, anime_list=anime_list)
         elif keyword == 'weekly_release':
             message = '每周放送列表：'
-            self.show_weekly_release_list(message=message, anime_list=anime_list)
+            self.show_weekly_release_list(
+                message=message, anime_list=anime_list)
         elif keyword == 'recent_updates_left':
             message = '最近更新（左）：'
-            self.show_recommended_daily_or_recent_updates_left_list(message=message, anime_list=anime_list)
+            self.show_recommended_daily_or_recent_updates_left_list(
+                message=message, anime_list=anime_list)
         elif keyword == 'recent_updates_right':
             message = '最近更新（右）：'
-            self.show_recent_updates_right_list(message=message, anime_list=anime_list)
+            self.show_recent_updates_right_list(
+                message=message, anime_list=anime_list)
         else:
             pass
 
     def run(self):
         '''启动AGE动漫首页信息采集器'''
         # 每日推荐
-        # recommended_daily_list = self.get_recommended_daily_list()
-        # self.integration_mode_show(keyword='recommended_daily', anime_list=recommended_daily_list)
+        recommended_daily_list = self.get_recommended_daily_or_recent_updates_left_list(
+            index=0)
+        self.integration_mode_show(
+            keyword='recommended_daily', anime_list=recommended_daily_list)
         # 每周放送列表
-        # weekly_release_list = self.get_weekly_release_list()
-        # self.integration_mode_show(keyword='weekly_release', anime_list=weekly_release_list)
+        weekly_release_list = self.get_weekly_release_list()
+        self.integration_mode_show(
+            keyword='weekly_release', anime_list=weekly_release_list)
         # 最近更新（左）
-        # recent_updates_left_list = self.get_recent_updates_left_list()
-        # self.integration_mode_show(keyword='recent_updates_left', anime_list=recent_updates_left_list)
+        recent_updates_left_list = self.get_recommended_daily_or_recent_updates_left_list(
+            index=1)
+        self.integration_mode_show(
+            keyword='recent_updates_left', anime_list=recent_updates_left_list)
         # 最近更新（右）
-        # recent_updates_right_list = self.get_recent_updates_right_list()
-        # self.integration_mode_show(keyword='recent_updates_right', anime_list=recent_updates_right_list)
+        recent_updates_right_list = self.get_recent_updates_right_list()
+        self.integration_mode_show(
+            keyword='recent_updates_right', anime_list=recent_updates_right_list)
 
 
 if '__main__' == __name__:
