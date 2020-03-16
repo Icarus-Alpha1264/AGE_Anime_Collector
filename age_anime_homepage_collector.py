@@ -40,8 +40,8 @@ class AnimeCollector:
         recommended_daily_list = []
         for anime in recommended_daily:
             title = anime.xpath('img/@alt').pop()
-            extra_info_parse = anime.xpath('span/text()')
             extra_info = ''
+            extra_info_parse = anime.xpath('span/text()')
             if extra_info_parse:
                 extra_info = extra_info_parse.pop()
             url = 'https://www.agefans.tv' + anime.xpath('@href').pop()
@@ -68,14 +68,18 @@ class AnimeCollector:
         blockcontent_pattern = '//div[@class="div_left baseblock"]//div[@class="blockcontent"]'
         blockcontent_node = self.selector.xpath(blockcontent_pattern)
         blockcontent_node_second = blockcontent_node.pop(1)
-        node_second_pattern = 'ul//li//a[position()=2]'
+        node_second_pattern = 'ul//li//a[position()=1]'
         recent_update_left = blockcontent_node_second.xpath(
             node_second_pattern)
         recent_update_left_list = []
         for anime in recent_update_left:
-            title = anime.xpath('div/text()').pop()
-            href = 'https://www.agefans.tv' + anime.xpath('@href').pop()
-            title_href_dict = {'title': title, 'href': href}
+            title = anime.xpath('img/@alt').pop()
+            extra_info = ''
+            extra_info_parse = anime.xpath('span/text()')
+            if extra_info_parse:
+                extra_info = extra_info_parse.pop()
+            url = 'https://www.agefans.tv' + anime.xpath('@href').pop()
+            title_href_dict = {'title': title, 'extra_info': extra_info, 'url': url}
             recent_update_left_list.append(title_href_dict)
         return recent_update_left_list
 
@@ -118,7 +122,7 @@ class AnimeCollector:
         '''显示最近更新列表（左）'''
         print('最近更新（左）：')
         for anime in recent_update_left_list:
-            print(anime['title'], anime['href'])
+            print(anime['title'], anime['extra_info'], anime['url'])
 
     def show_recent_update_right_list(self, recent_update_right_list=None):
         '''显示最近更新列表（右）'''
@@ -129,14 +133,14 @@ class AnimeCollector:
     def run(self):
         '''启动AGE动漫首页信息采集器'''
         # 每日推荐
-        recommended_daily_list = self.get_recommended_daily_list()
-        self.show_recommended_daily_list(recommended_daily_list)
+        # recommended_daily_list = self.get_recommended_daily_list()
+        # self.show_recommended_daily_list(recommended_daily_list)
         # 每周放送列表
         # weekly_playlist = self.get_weekly_playlist()
         # self.show_weekly_playlist(weekly_playlist)
         # 最近更新（左）
-        # recent_update_left_list = self.get_recent_update_left_list()
-        # self.show_recent_update_left_list(recent_update_left_list)
+        recent_update_left_list = self.get_recent_update_left_list()
+        self.show_recent_update_left_list(recent_update_left_list)
         # 最近更新（右）
         # recent_update_right_list = self.get_recent_update_right_list()
         # self.show_recent_update_right_list(recent_update_right_list)
