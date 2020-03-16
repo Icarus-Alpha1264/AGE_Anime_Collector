@@ -51,12 +51,14 @@ class AnimeCollector:
 
     def get_weekly_playlist(self, weekly_playlist=None):
         '''获取AGE动漫首页每周放送列表'''
-        js_pattern = '//div[@class="blockcontent"]//script/text()'
-        js_content = self.selector.xpath(js_pattern)
+        blockcontent_pattern = '//div[@class="div_right baseblock"]//div[@class="blockcontent"]'
+        blockcontent_parse = self.selector.xpath(blockcontent_pattern)
+        blockcontent = blockcontent_parse.pop(0)
+        js_pattern = 'script/text()'
+        js_content = blockcontent.xpath(js_pattern)
         js_string = ''.join(js_content)
-        re_pattern = r'var new_anime_list = (.*);$'
-        re_match = re.findall(pattern=re_pattern,
-                              string=js_string, flags=re.MULTILINE)
+        re_pattern = r'var new_anime_list = (.*);'
+        re_match = re.findall(pattern=re_pattern, string=js_string, flags=re.MULTILINE)
         if not re_match:
             sys.exit(-1)
         anime_list = re_match.pop()
@@ -115,8 +117,10 @@ class AnimeCollector:
             print(key + '：')
             for anime in weekly_playlist:
                 if anime['wd'] == value:
-                    print(anime['name'], anime['namefornew'],
-                          'https://www.agefans.tv/detail/' + anime['id'])
+                    is_new = ''
+                    if anime['isnew'] == True:
+                        is_new = 'new!'
+                    print(anime['name'], anime['namefornew'], is_new, 'https://www.agefans.tv/detail/' + anime['id'])
 
     def show_recent_update_left_list(self, recent_update_left_list=None):
         '''显示最近更新列表（左）'''
@@ -136,11 +140,11 @@ class AnimeCollector:
         # recommended_daily_list = self.get_recommended_daily_list()
         # self.show_recommended_daily_list(recommended_daily_list)
         # 每周放送列表
-        # weekly_playlist = self.get_weekly_playlist()
-        # self.show_weekly_playlist(weekly_playlist)
+        weekly_playlist = self.get_weekly_playlist()
+        self.show_weekly_playlist(weekly_playlist)
         # 最近更新（左）
-        recent_update_left_list = self.get_recent_update_left_list()
-        self.show_recent_update_left_list(recent_update_left_list)
+        # recent_update_left_list = self.get_recent_update_left_list()
+        # self.show_recent_update_left_list(recent_update_left_list)
         # 最近更新（右）
         # recent_update_right_list = self.get_recent_update_right_list()
         # self.show_recent_update_right_list(recent_update_right_list)
