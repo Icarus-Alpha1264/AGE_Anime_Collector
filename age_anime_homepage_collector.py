@@ -36,7 +36,7 @@ class AnimeCollector:
         blockcontent_node_first = blockcontent_node.pop(0)
         node_first_pattern = 'ul//li//a[position()=2]'
         recommended_daily = blockcontent_node_first.xpath(node_first_pattern)
-        recommended_daily_list=[]
+        recommended_daily_list = []
         for anime in recommended_daily:
             title = anime.xpath('div/text()').pop()
             href = 'https://www.agefans.tv' + anime.xpath('@href').pop()
@@ -62,10 +62,11 @@ class AnimeCollector:
         '''获取AGE动漫首页左侧的最近更新动漫列表'''
         blockcontent_pattern = '//div[@class="div_left baseblock"]//div[@class="blockcontent"]'
         blockcontent_node = self.selector.xpath(blockcontent_pattern)
-        blockcontent_node_first = blockcontent_node.pop(1)
-        node_first_pattern = 'ul//li//a[position()=2]'
-        recent_update_left = blockcontent_node_first.xpath(node_first_pattern)
-        recent_update_left_list=[]
+        blockcontent_node_second = blockcontent_node.pop(1)
+        node_second_pattern = 'ul//li//a[position()=2]'
+        recent_update_left = blockcontent_node_second.xpath(
+            node_second_pattern)
+        recent_update_left_list = []
         for anime in recent_update_left:
             title = anime.xpath('div/text()').pop()
             href = 'https://www.agefans.tv' + anime.xpath('@href').pop()
@@ -75,6 +76,19 @@ class AnimeCollector:
 
     def get_recent_update_right_list(self, recent_update_right_list=None):
         '''获取AGE动漫首页右侧的最近更新动漫列表'''
+        blockcontent_pattern = '//div[@class="div_right baseblock"]//div[@class="blockcontent"]'
+        blockcontent_node = self.selector.xpath(blockcontent_pattern)
+        blockcontent_node_second = blockcontent_node.pop(1)
+        node_second_pattern = 'ul//li'
+        recent_update_right = blockcontent_node_second.xpath(
+            node_second_pattern)
+        recent_update_right_list = []
+        for anime in recent_update_right:
+            title = anime.xpath('a/text()').pop()
+            url = 'https://www.agefans.tv' + anime.xpath('a/@href').pop()
+            update_time = anime.xpath('span/text()').pop()
+            title_url_update_dict = {'title': title, 'url': url, 'update_time': update_time}
+            recent_update_right_list.append(title_url_update_dict)
         return recent_update_right_list
 
     def show_recommended_daily_list(self, recommended_daily_list=None):
@@ -103,7 +117,9 @@ class AnimeCollector:
 
     def show_recent_update_right_list(self, recent_update_right_list=None):
         '''显示最近更新列表（右）'''
-        pass
+        print('最近更新（右）：')
+        for anime in recent_update_right_list:
+            print(anime['title'], anime['url'], anime['update_time'])
 
     def run(self):
         '''启动AGE动漫首页信息采集器'''
@@ -114,11 +130,11 @@ class AnimeCollector:
         # weekly_playlist = self.get_weekly_playlist()
         # self.show_weekly_playlist(weekly_playlist)
         # 最近更新（左）
-        recent_update_left_list = self.get_recent_update_left_list()
-        self.show_recent_update_left_list(recent_update_left_list)
+        # recent_update_left_list = self.get_recent_update_left_list()
+        # self.show_recent_update_left_list(recent_update_left_list)
         # 最近更新（右）
-        # recent_update_right_list = self.get_recent_update_right_list()
-        # self.show_recent_update_right_list(recent_update_right_list)
+        recent_update_right_list = self.get_recent_update_right_list()
+        self.show_recent_update_right_list(recent_update_right_list)
 
 
 if '__main__' == __name__:
