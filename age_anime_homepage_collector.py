@@ -105,18 +105,18 @@ class AnimeCollector:
                                      'url': url, 'update_time': update_time}
             recent_update_right_list.append(title_url_update_dict)
         return recent_update_right_list
-
-    def show_recommended_daily_list(self, anime_list=None):
-        '''显示每日推荐动漫列表'''
-        print('每日推荐：')
+    
+    def show_recommended_daily_or_recent_updates_left_list(self, message=None, anime_list=None):
+        '''整合了展示AGE动漫首页左侧的包括每日更新和最近更新（左）动漫列表'''
+        print(message)
         for anime in anime_list:
             print(anime['title'], anime['extra_info'], anime['url'])
 
-    def show_weekly_release_list(self, anime_list=None):
+    def show_weekly_release_list(self, message=None, anime_list=None):
         '''显示每周放送动漫列表'''
         date_define_dict = {'周一': 1, '周二': 2, '周三': 3,
                             '周四': 4, '周五': 5, '周六': 6, '周日': 0}
-        print('每周放送列表：')
+        print(message)
         for key, value in date_define_dict.items():
             print(key + '：')
             for anime in anime_list:
@@ -127,15 +127,9 @@ class AnimeCollector:
                     print(anime['name'], anime['namefornew'], is_new,
                           'https://www.agefans.tv/detail/' + anime['id'])
     
-    def show_recent_updates_left_list(self, anime_list=None):
-        '''显示左侧的最近更新动漫列表'''
-        print('最近更新（左）：')
-        for anime in anime_list:
-            print(anime['title'], anime['extra_info'], anime['url'])
-    
-    def show_recent_updates_right_list(self, anime_list=None):
+    def show_recent_updates_right_list(self, message=None, anime_list=None):
         '''显示右侧的最近更新动漫列表'''
-        print('最近更新（右）：')
+        print(message)
         for anime in anime_list:
             print(anime['title'], anime['url'], anime['update_time'])
 
@@ -143,13 +137,17 @@ class AnimeCollector:
     def integration_mode_show(self, keyword=None, anime_list=None):
         '''整合模式显示动漫列表'''
         if keyword == 'recommended_daily':
-            self.show_recommended_daily_list(anime_list=anime_list)
+            message = '每日推荐：'
+            self.show_recommended_daily_or_recent_updates_left_list(message=message, anime_list=anime_list)
         elif keyword == 'weekly_release':
-            self.show_weekly_release_list(anime_list=anime_list)
+            message = '每周放送列表：'
+            self.show_weekly_release_list(message=message, anime_list=anime_list)
         elif keyword == 'recent_updates_left':
-            self.show_recent_updates_left_list(anime_list=anime_list)
+            message = '最近更新（左）：'
+            self.show_recommended_daily_or_recent_updates_left_list(message=message, anime_list=anime_list)
         elif keyword == 'recent_updates_right':
-            self.show_recent_updates_right_list(anime_list=anime_list)
+            message = '最近更新（右）：'
+            self.show_recent_updates_right_list(message=message, anime_list=anime_list)
         else:
             pass
 
