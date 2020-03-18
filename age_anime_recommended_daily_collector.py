@@ -70,10 +70,4 @@ class AnimeCollector:
         """每日推荐动漫列表采集器启动程序"""
         last_page_number = self.get_last_page_numer()
         self.parse_recommended_daily_anime_list(last_page_number=last_page_number)
-        # self.show_recommended_daily_anime_list()
-
-if '__main__' == __name__:
-    anime_collector = AnimeCollector()
-    anime_collector.run()
-    for anime in anime_collector.recommended_daily_list:
-        print(anime)
+        self.show_recommended_daily_anime_list()
