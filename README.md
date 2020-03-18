@@ -1,5 +1,5 @@
 # AGE Anime Collector（AGE动漫采集器）
--
+----
 ## AGE动漫首页采集器：age_anime_homepage_collector.py
 ### 主要功能：
 1. 采集AGE动漫首页每日推荐。
@@ -27,7 +27,7 @@ anime_collector = AnimeCollector()
 weekly_release_list = anime_collector.get_weekly_release_list()
 ```
 具体格式类型如下所示：
-```json
+```
 {'isnew': False, 'id': '20190054', 'wd': 1, 'name': '海盗战记', 'mtime': '2019-12-30 00:12:36', 'namefornew': '第24话(完结)'}
 {'isnew': False, 'id': '20190218', 'wd': 1, 'name': '非洲的动物上班族', 'mtime': '2019-12-23 00:38:32', 'namefornew': '第12话(完结)'}
 {'isnew': False, 'id': '20190203', 'wd': 1, 'name': '我不是说了能力要平均值么！', 'mtime': '2019-12-23 23:02:41', 'namefornew': '第12话(完结)'}
