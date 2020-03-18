@@ -46,10 +46,7 @@ class AnimeCollector:
         anime_index = blockcontent_node_index.xpath(node_index_pattern)
         for anime in anime_index:
             title = anime.xpath('img/@alt').pop()
-            extra_info = ''
-            extra_info_parse = anime.xpath('span/text()')
-            if extra_info_parse:
-                extra_info = extra_info_parse.pop()
+            extra_info = anime.xpath('span/text()').pop()
             url = 'https://www.agefans.tv' + anime.xpath('@href').pop()
             title_extra_info_url_dict = {'title': title,
                                          'extra_info': extra_info, 'url': url}
