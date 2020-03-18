@@ -153,8 +153,3 @@ class AnimeCollector:
         recent_updates_right_list = self.get_recent_updates_right_list()
         self.integration_mode_show(
             keyword='recent_updates_right', anime_list=recent_updates_right_list)
-
-
-if '__main__' == __name__:
-    anime_collector = AnimeCollector()
-    anime_collector.run()
