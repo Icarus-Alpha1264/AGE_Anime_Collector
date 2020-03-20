@@ -15,7 +15,13 @@ class AnimeCollector:
 
     def __init__(self):
         """初始化AGE动漫首页信息采集器"""
+        self.__url = 'https://www.agefans.tv'
         self.__selector = self.init_selector()
+
+    @property
+    def url(self):
+        """通过构建property来返回目标网址"""
+        return self.__url
 
     @property
     def selector(self):
@@ -24,8 +30,7 @@ class AnimeCollector:
 
     def init_selector(self):
         """解析AGE动漫首页并生成选择器"""
-        url = 'https://www.agefans.tv/'
-        response = requests.get(url=url, verify=False, timeout=5)
+        response = requests.get(url=self.url, verify=False, timeout=5)
         text = response.text
         selector = etree.HTML(text)
         return selector
@@ -44,7 +49,7 @@ class AnimeCollector:
                 extra_info = anime.xpath('span/text()').pop()
             except IndexError:
                 extra_info = ''
-            url = 'https://www.agefans.tv' + anime.xpath('@href').pop()
+            url = self.url + anime.xpath('@href').pop()
             title_extra_info_url_dict = {'title': title,
                                          'extra_info': extra_info, 'url': url}
             anime_list.append(title_extra_info_url_dict)
@@ -78,7 +83,7 @@ class AnimeCollector:
             node_second_pattern)
         for anime in recent_update_right:
             title = anime.xpath('a/text()').pop()
-            url = 'https://www.agefans.tv' + anime.xpath('a/@href').pop()
+            url = self.url + anime.xpath('a/@href').pop()
             update_time = anime.xpath('span/text()').pop()
             title_url_update_dict = {'title': title,
                                      'url': url, 'update_time': update_time}
@@ -105,7 +110,7 @@ class AnimeCollector:
                     else:
                         is_new = ''
                     print(anime['name'], anime['namefornew'], is_new,
-                          'https://www.agefans.tv/detail/' + anime['id'])
+                          self.url + '/detail/' + anime['id'])
 
     def show_recent_updates_right_list(self, message, anime_list):
         """显示右侧的最近更新动漫列表"""
