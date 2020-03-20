@@ -10,10 +10,10 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 class AnimeCollector:
     """每日推荐动漫列表采集器"""
 
-    def __init__(self, selector=None, recommended_daily_list=[]):
-        self.__selector = selector
-        self.__recommended_daily_list = recommended_daily_list
-        self.selector = 'https://www.agefans.tv/recommend'
+    def __init__(self):
+        self.__selector = None
+        self.__recommended_daily_list = []
+        self.update_selector(url='https://www.agefans.tv/recommend')
 
     @property
     def selector(self):
@@ -23,18 +23,11 @@ class AnimeCollector:
     def recommended_daily_list(self):
         return self.__recommended_daily_list
 
-    @selector.setter
-    def selector(self, url=None):
+    def update_selector(self, url):
         """通过改变url的方式来自动更新选择器"""
         response = requests.get(url=url, verify=False, timeout=5)
         text = response.text
-        selector = etree.HTML(text)
-        self.__selector = selector
-
-    @recommended_daily_list.setter
-    def recommended_daily_list(self, recommended_daily_list=[]):
-        """通过向列表追加的方式新增列表元素"""
-        self.__recommended_daily_list.append(recommended_daily_list)
+        self.__selector = etree.HTML(text)
 
     def get_last_page_numer(self):
         """获取每日推荐的最后一页的页码"""
@@ -50,15 +43,19 @@ class AnimeCollector:
         all_anime = self.selector.xpath('//ul//li')
         for anime in all_anime:
             title = anime.xpath('a//img/@alt').pop()
-            extra_info = anime.xpath('a//img/@title').pop()
+            try:
+                extra_info = anime.xpath('a//img/@title').pop()
+            except IndexError:
+                extra_info = ''
             url = 'https://www.agefans.tv' + anime.xpath('a/@href').pop()
             anime_dict = {'title': title, 'extra_info': extra_info, 'url': url}
-            self.recommended_daily_list = anime_dict
+            self.recommended_daily_list.append(anime_dict)
 
-    def parse_recommended_daily_anime_list(self, last_page_number=None):
+    def parse_recommended_daily_anime_list(self, last_page_number):
         """解析每日推荐动漫列表"""
         for page_number in range(1, last_page_number + 1):
-            self.selector = 'https://www.agefans.tv/recommend?page=' + str(page_number)
+            url = 'https://www.agefans.tv/recommend?page=' + str(page_number)
+            self.update_selector(url=url)
             self.parse_current_page_anime_list()
 
     def show_recommended_daily_anime_list(self):
