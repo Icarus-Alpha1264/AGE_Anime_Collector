@@ -100,9 +100,10 @@ class AnimeCollector:
             print(key + '：')
             for anime in anime_list:
                 if anime['wd'] == value:
-                    is_new = ''
                     if anime['isnew']:
                         is_new = 'new!'
+                    else:
+                        is_new = ''
                     print(anime['name'], anime['namefornew'], is_new,
                           'https://www.agefans.tv/detail/' + anime['id'])
 
