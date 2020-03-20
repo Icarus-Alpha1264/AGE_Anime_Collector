@@ -13,20 +13,14 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 class AnimeCollector:
     """AGE动漫首页信息采集器"""
 
-    def __init__(self, selector=None):
+    def __init__(self):
         """初始化AGE动漫首页信息采集器"""
-        self.__selector = selector
-        self.selector = self.init_selector()
+        self.__selector = self.init_selector()
 
     @property
     def selector(self):
         """通过构建property来返回选择器"""
         return self.__selector
-
-    @selector.setter
-    def selector(self, selector=None):
-        """通过构建property.setter来设置选择器"""
-        self.__selector = selector
 
     def init_selector(self):
         """解析AGE动漫首页并生成选择器"""
@@ -36,7 +30,7 @@ class AnimeCollector:
         selector = etree.HTML(text)
         return selector
 
-    def get_recommended_daily_or_recent_updates_left_list(self, index=None):
+    def get_recommended_daily_or_recent_updates_left_list(self, index):
         """获取AGE动漫首页左侧的每日推荐和最近更新（左）动漫列表"""
         anime_list = []
         blockcontent_pattern = '//div[@class="div_left baseblock"]//div[@class="blockcontent"]'
@@ -46,7 +40,10 @@ class AnimeCollector:
         anime_index = blockcontent_node_index.xpath(node_index_pattern)
         for anime in anime_index:
             title = anime.xpath('img/@alt').pop()
-            extra_info = anime.xpath('span/text()').pop()
+            try:
+                extra_info = anime.xpath('span/text()').pop()
+            except IndexError:
+                extra_info = ''
             url = 'https://www.agefans.tv' + anime.xpath('@href').pop()
             title_extra_info_url_dict = {'title': title,
                                          'extra_info': extra_info, 'url': url}
@@ -88,13 +85,13 @@ class AnimeCollector:
             recent_update_right_list.append(title_url_update_dict)
         return recent_update_right_list
 
-    def show_recommended_daily_or_recent_updates_left_list(self, message=None, anime_list=[]):
+    def show_recommended_daily_or_recent_updates_left_list(self, message, anime_list):
         """整合了展示AGE动漫首页左侧的包括每日更新和最近更新（左）动漫列表"""
         print(message)
         for anime in anime_list:
             print(anime['title'], anime['extra_info'], anime['url'])
 
-    def show_weekly_release_list(self, message=None, anime_list=[]):
+    def show_weekly_release_list(self, message, anime_list):
         """显示每周放送动漫列表"""
         date_define_dict = {'周一': 1, '周二': 2, '周三': 3,
                             '周四': 4, '周五': 5, '周六': 6, '周日': 0}
@@ -109,13 +106,13 @@ class AnimeCollector:
                     print(anime['name'], anime['namefornew'], is_new,
                           'https://www.agefans.tv/detail/' + anime['id'])
 
-    def show_recent_updates_right_list(self, message=None, anime_list=[]):
+    def show_recent_updates_right_list(self, message, anime_list):
         """显示右侧的最近更新动漫列表"""
         print(message)
         for anime in anime_list:
             print(anime['title'], anime['update_time'], anime['url'])
 
-    def integration_mode_show(self, keyword=None, anime_list=[]):
+    def integration_mode_show(self, keyword, anime_list):
         """整合模式显示动漫列表"""
         if keyword == 'recommended_daily':
             message = '每日推荐：'
