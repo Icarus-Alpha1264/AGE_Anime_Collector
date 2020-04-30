@@ -52,7 +52,7 @@ class AnimeCollector:
             except IndexError:
                 extra_info = ''
             url = 'https://www.agefans.tv' + anime.xpath('a/@href')[0]
-            print("title:", title, "extra_info:", extra_info, "url:", url)
+            print("动漫名称：", title, "动漫额外信息：", extra_info, "动漫详情页地址：", url)
 
     def parse_recommended_daily_anime_list(self, last_page_number):
         """解析每日推荐动漫列表"""

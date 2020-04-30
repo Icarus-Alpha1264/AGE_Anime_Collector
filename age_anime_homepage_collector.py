@@ -53,25 +53,30 @@ class AnimeCollector:
             except IndexError:
                 extra_info = ""
             image_url = "https:" + image_node.xpath("@src")[0]
-            print("url:", url, "title:", title, "extra info:", extra_info, "image url:", image_url)
+            print("动漫详情页地址：", url, "动漫名称：", title, "动漫额外信息：",
+                  extra_info, "封面图片地址：", image_url)
 
     def parse_left_elements(self):
         """页面左侧元素解析"""
-        div_left_baseblock_node = self.selector.xpath("//div[@class='div_left baseblock']")[0]
-        div_blockcontent_nodes = div_left_baseblock_node.xpath("div[@class='blockcontent']")
+        div_left_baseblock_node = self.selector.xpath(
+            "//div[@class='div_left baseblock']")[0]
+        div_blockcontent_nodes = div_left_baseblock_node.xpath(
+            "div[@class='blockcontent']")
         nodes_count = len(div_blockcontent_nodes)
         for index in range(nodes_count):
             div_blockcontent_node = div_blockcontent_nodes[index]
             if index == 0:
-                message = "recommended daily:"
+                message = "每日推荐："
             else:
-                message = "recent updates left:"
-            self.parse_common_part(message=message, div_blockcontent_node=div_blockcontent_node)
+                message = "最近更新（左下方）："
+            self.parse_common_part(
+                message=message, div_blockcontent_node=div_blockcontent_node)
 
     def parse_weekly_release(self, message=None, div_blockcontent_node=None):
         """每周放送列表解析"""
         print(message)
-        javascript_original_content = div_blockcontent_node.xpath("script/text()")
+        javascript_original_content = div_blockcontent_node.xpath(
+            "script/text()")
         javascript_string_content = "".join(javascript_original_content)
         re_match = re.findall(pattern=r"var new_anime_list = (.*);", string=javascript_string_content,
                               flags=re.MULTILINE)
@@ -92,23 +97,29 @@ class AnimeCollector:
         for index in range(nodes_count):
             li_node = li_nodes[index]
             title = li_node.xpath("a[@class='one_new_anime_name']/text()")[0]
-            url = "https://www.agefans.tv" + li_node.xpath("a[@class='one_new_anime_name']/@href")[0]
-            update_time = li_node.xpath("span[@class='anime_update_date asciifont']/text()")[0]
-            print("title:", title, "url:", url, "update time:", update_time)
+            url = "https://www.agefans.tv" + \
+                li_node.xpath("a[@class='one_new_anime_name']/@href")[0]
+            update_time = li_node.xpath(
+                "span[@class='anime_update_date asciifont']/text()")[0]
+            print("动漫名称：", title, "动漫详情页地址：", url, "动漫最近更新时间：", update_time)
 
     def parse_right_elements(self):
         """页面右侧元素解析"""
-        div_right_baseblock_node = self.selector.xpath("//div[@class='div_right baseblock']")[0]
-        div_blockcontent_nodes = div_right_baseblock_node.xpath("div[@class='blockcontent']")
+        div_right_baseblock_node = self.selector.xpath(
+            "//div[@class='div_right baseblock']")[0]
+        div_blockcontent_nodes = div_right_baseblock_node.xpath(
+            "div[@class='blockcontent']")
         div_blockcontent_nodes_count = len(div_blockcontent_nodes)
         for index in range(div_blockcontent_nodes_count):
             div_blockcontent_node = div_blockcontent_nodes[index]
             if index == 0:
-                message = "weekly release:"
-                self.parse_weekly_release(message=message, div_blockcontent_node=div_blockcontent_node)
+                message = "每周放送列表："
+                self.parse_weekly_release(
+                    message=message, div_blockcontent_node=div_blockcontent_node)
             else:
-                message = "recent updates right:"
-                self.parse_recent_updates_right(message=message, div_blockcontent_node=div_blockcontent_node)
+                message = "最近更新（右下）："
+                self.parse_recent_updates_right(
+                    message=message, div_blockcontent_node=div_blockcontent_node)
 
     def parse(self):
         """解析主函数"""
