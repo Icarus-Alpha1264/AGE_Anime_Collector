@@ -28,33 +28,36 @@ class AnimeCollector:
 
     @selector.setter
     def selector(self, selector=None):
-        self.__selector = selector
+        if selector is not None:
+            self.__selector = selector
 
     def update_selector(self, url=None):
-        response = requests.get(url=url, verify=False, timeout=5)
-        text = response.text
-        selector = etree.HTML(text)
-        self.selector = selector
+        if url is not None:
+            response = requests.get(url=url, verify=False, timeout=5)
+            text = response.text
+            selector = etree.HTML(text=text)
+            self.selector = selector
 
     def parse_common_part(self, message=None, div_blockcontent_node=None):
         """公共解析部分"""
-        print(message)
-        ul_node = div_blockcontent_node.xpath("ul[@class='ul_li_a5']")[0]
-        li_nodes = ul_node.xpath("li[@class='anime_icon1']")
-        nodes_count = len(li_nodes)
-        for index in range(nodes_count):
-            li_node = li_nodes[index]
-            a_node = li_node.xpath("a")[0]
-            url = "https://www.agefans.tv/" + a_node.xpath("@href")[0]
-            image_node = a_node.xpath("img[@class='anime_icon1_img']")[0]
-            title = image_node.xpath("@alt")[0]
-            try:
-                extra_info = image_node.xpath("@title")[0]
-            except IndexError:
-                extra_info = ""
-            image_url = "https:" + image_node.xpath("@src")[0]
-            print("动漫详情页地址：", url, "动漫名称：", title, "动漫额外信息：",
-                  extra_info, "封面图片地址：", image_url)
+        if message is not None and div_blockcontent_node is not None:
+            print(message)
+            ul_node = div_blockcontent_node.xpath("ul[@class='ul_li_a5']")[0]
+            li_nodes = ul_node.xpath("li[@class='anime_icon1']")
+            nodes_count = len(li_nodes)
+            for index in range(nodes_count):
+                li_node = li_nodes[index]
+                a_node = li_node.xpath("a")[0]
+                url = "https://www.agefans.tv/" + a_node.xpath("@href")[0]
+                image_node = a_node.xpath("img[@class='anime_icon1_img']")[0]
+                title = image_node.xpath("@alt")[0]
+                try:
+                    extra_info = image_node.xpath("@title")[0]
+                except IndexError:
+                    extra_info = ""
+                image_url = "https:" + image_node.xpath("@src")[0]
+                print("动漫详情页地址：", url, "动漫名称：", title, "动漫额外信息：",
+                      extra_info, "封面图片地址：", image_url)
 
     def parse_left_elements(self):
         """页面左侧元素解析"""
@@ -74,34 +77,38 @@ class AnimeCollector:
 
     def parse_weekly_release(self, message=None, div_blockcontent_node=None):
         """每周放送列表解析"""
-        print(message)
-        javascript_original_content = div_blockcontent_node.xpath(
-            "script/text()")
-        javascript_string_content = "".join(javascript_original_content)
-        re_match = re.findall(pattern=r"var new_anime_list = (.*);", string=javascript_string_content,
-                              flags=re.MULTILINE)
-        if not re_match:
-            sys.exit(-1)
-        anime_list = re_match[0]
-        weekly_release_list = json.loads(anime_list)
-        weekly_release_list_count = len(weekly_release_list)
-        for index in range(weekly_release_list_count):
-            print(weekly_release_list[index])
+        if message is not None and div_blockcontent_node is not None:
+            print(message)
+            javascript_original_content = div_blockcontent_node.xpath(
+                "script/text()")
+            javascript_string_content = "".join(javascript_original_content)
+            re_match = re.findall(pattern=r"var new_anime_list = (.*);", string=javascript_string_content,
+                                  flags=re.MULTILINE)
+            if not re_match:
+                sys.exit(-1)
+            anime_list = re_match[0]
+            weekly_release_list = json.loads(anime_list)
+            weekly_release_list_count = len(weekly_release_list)
+            for index in range(weekly_release_list_count):
+                print(weekly_release_list[index])
 
     def parse_recent_updates_right(self, message=None, div_blockcontent_node=None):
         """最近更新（右）解析"""
-        print(message)
-        ul_node = div_blockcontent_node.xpath("ul[@id='anime_update']")[0]
-        li_nodes = ul_node.xpath("li[@class='one_new_anime']")
-        nodes_count = len(li_nodes)
-        for index in range(nodes_count):
-            li_node = li_nodes[index]
-            title = li_node.xpath("a[@class='one_new_anime_name']/text()")[0]
-            url = "https://www.agefans.tv" + \
-                li_node.xpath("a[@class='one_new_anime_name']/@href")[0]
-            update_time = li_node.xpath(
-                "span[@class='anime_update_date asciifont']/text()")[0]
-            print("动漫名称：", title, "动漫详情页地址：", url, "动漫最近更新时间：", update_time)
+        if message is not None and div_blockcontent_node is not None:
+            print(message)
+            ul_node = div_blockcontent_node.xpath("ul[@id='anime_update']")[0]
+            li_nodes = ul_node.xpath("li[@class='one_new_anime']")
+            nodes_count = len(li_nodes)
+            for index in range(nodes_count):
+                li_node = li_nodes[index]
+                title = li_node.xpath(
+                    "a[@class='one_new_anime_name']/text()")[0]
+                url = "https://www.agefans.tv" + \
+                    li_node.xpath("a[@class='one_new_anime_name']/@href")[0]
+                update_time = li_node.xpath(
+                    "span[@class='anime_update_date asciifont']/text()")[0]
+                print("动漫名称：", title, "动漫详情页地址：",
+                      url, "动漫最近更新时间：", update_time)
 
     def parse_right_elements(self):
         """页面右侧元素解析"""

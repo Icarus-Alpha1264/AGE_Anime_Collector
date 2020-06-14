@@ -25,21 +25,28 @@ class AnimeCollector:
 
     @selector.setter
     def selector(self, selector=None):
-        self.__selector = selector
+        if selector is not None:
+            self.__selector = selector
 
     def update_selector(self, url=None):
-        response = requests.get(url=url, verify=False, timeout=5)
-        text = response.text
-        selector = etree.HTML(text)
-        self.selector = selector
+        if url is not None:
+            response = requests.get(url=url, verify=False, timeout=5)
+            text = response.text
+            selector = etree.HTML(text=text)
+            self.selector = selector
 
     def get_last_page_numer(self):
         """获取每日推荐的最后一页的页码"""
-        flip_bar_list = self.selector.xpath('//div[@class="blockcontent"]//div')
+        flip_bar_list = self.selector.xpath(
+            '//div[@class="blockcontent"]//div')
         up_flip_bar = flip_bar_list[0]
         last_page_href = up_flip_bar.xpath('li//a/@href')[-1]
-        last_page_number_string = re.findall(pattern=r'\d+', string=last_page_href)[0]
-        last_page_number = int(last_page_number_string)
+        last_page_number_string = re.findall(
+            pattern=r'\d+', string=last_page_href)[0]
+        try:
+            last_page_number = int(last_page_number_string)
+        except ValueError:
+            last_page_number = 1
         return last_page_number
 
     def parse_current_page_anime_list(self):
@@ -54,14 +61,17 @@ class AnimeCollector:
             url = 'https://www.agefans.tv' + anime.xpath('a/@href')[0]
             print("动漫名称：", title, "动漫额外信息：", extra_info, "动漫详情页地址：", url)
 
-    def parse_recommended_daily_anime_list(self, last_page_number):
+    def parse_recommended_daily_anime_list(self, last_page_number=None):
         """解析每日推荐动漫列表"""
-        for page_number in range(1, last_page_number + 1):
-            url = 'https://www.agefans.tv/recommend?page=' + str(page_number)
-            self.update_selector(url=url)
-            self.parse_current_page_anime_list()
+        if last_page_number is not None:
+            for page_number in range(1, last_page_number + 1):
+                url = 'https://www.agefans.tv/recommend?page=' + \
+                    str(page_number)
+                self.update_selector(url=url)
+                self.parse_current_page_anime_list()
 
     def parse(self):
         """每日推荐动漫列表采集器启动程序"""
         last_page_number = self.get_last_page_numer()
-        self.parse_recommended_daily_anime_list(last_page_number=last_page_number)
+        self.parse_recommended_daily_anime_list(
+            last_page_number=last_page_number)
